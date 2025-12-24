@@ -1,10 +1,11 @@
 import { Stack } from 'expo-router';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import '../global.css';
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
+    <>
+      <StatusBar style="light" backgroundColor="#7c3aed" />
       <Stack
         screenOptions={{
           headerStyle: {
@@ -13,23 +14,20 @@ export default function RootLayout() {
           headerTintColor: '#fff',
           headerTitleStyle: {
             fontWeight: 'bold',
+            fontSize: 18,
           },
+          headerShadowVisible: false,
         }}
       >
-        <Stack.Screen 
-          name="(tabs)" 
-          options={{ 
-            headerShown: false 
-          }} 
-        />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen 
           name="order/[id]" 
           options={{ 
             title: 'Order Details',
-            presentation: 'card'
+            headerBackTitle: 'Back',
           }} 
         />
       </Stack>
-    </SafeAreaProvider>
+    </>
   );
 }

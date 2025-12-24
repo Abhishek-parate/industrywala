@@ -1,15 +1,25 @@
 import { View, Text } from 'react-native';
-import React from 'react';
-import { STATUS_COLORS, STATUS_LABELS } from '../utils/constants';
 
 export default function StatusBadge({ status }) {
-  const colorClass = STATUS_COLORS[status] || 'bg-gray-100 text-gray-800';
-  const label = STATUS_LABELS[status] || status;
-  
+  const getStatusClasses = (status) => {
+    const styles = {
+      pending: 'bg-yellow-100 border-yellow-500 text-yellow-700',
+      processing: 'bg-blue-100 border-blue-500 text-blue-700',
+      completed: 'bg-green-100 border-green-500 text-green-700',
+      cancelled: 'bg-red-100 border-red-500 text-red-700',
+      refunded: 'bg-gray-100 border-gray-500 text-gray-700',
+      failed: 'bg-red-100 border-red-500 text-red-700',
+      'on-hold': 'bg-orange-100 border-orange-500 text-orange-700',
+    };
+    return styles[status] || styles.pending;
+  };
+
+  const classes = getStatusClasses(status);
+
   return (
-    <View className={`px-3 py-1 rounded-full ${colorClass}`}>
-      <Text className={`text-xs font-semibold uppercase ${colorClass.split(' ')[1]}`}>
-        {label}
+    <View className={`px-3 py-1.5 rounded-full border ${classes}`}>
+      <Text className={`text-xs font-semibold capitalize ${classes}`}>
+        {status.replace('-', ' ')}
       </Text>
     </View>
   );

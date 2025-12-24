@@ -1,173 +1,168 @@
-import { View, Text, FlatList, RefreshControl, TouchableOpacity, Alert } from 'react-native';
-import React, { useState, useEffect, useCallback } from 'react';
-import wooCommerceService from '../../services/woocommerce';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import api from '../../services/api';
 import OrderCard from '../../components/OrderCard';
-import Loader from '../../components/Loader';
-import EmptyState from '../../components/EmptyState';
-import { ORDER_STATUSES } from '../../utils/constants';
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  
-  // Fetch orders
-  const fetchOrders = async (pageNum = 1, status = 'all', refresh = false) => {
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all');
+
+  const fetchOrders = async () => {
     try {
-      if (refresh) {
-        setRefreshing(true);
-      } else if (pageNum === 1) {
-        setLoading(true);
-      }
-      
+      setError(null);
+
       const params = {
-        page: pageNum,
-        per_page: 20,
+        per_page: 50,
+        orderby: 'date',
+        order: 'desc',
       };
-      
-      if (status !== 'all') {
-        params.status = status;
+
+      if (filter !== 'all') {
+        params.status = filter;
       }
-      
-      const data = await wooCommerceService.getOrders(params);
-      
-      if (refresh || pageNum === 1) {
-        setOrders(data);
-      } else {
-        setOrders(prev => [...prev, ...data]);
-      }
-      
-      setHasMore(data.length === 20);
-      setPage(pageNum);
-      
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        error.message || 'Failed to fetch orders',
-        [{ text: 'OK' }]
-      );
+
+      const response = await api.get('/orders', { params });
+      setOrders(response.data);
+    } catch (err) {
+      setError(err?.message || 'Failed to load orders');
+      console.error('Error fetching orders:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
-  
-  // Initial load
+
   useEffect(() => {
-    fetchOrders(1, selectedStatus);
-  }, [selectedStatus]);
-  
-  // Pull to refresh
-  const onRefresh = useCallback(() => {
-    fetchOrders(1, selectedStatus, true);
-  }, [selectedStatus]);
-  
-  // Load more (pagination)
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      fetchOrders(page + 1, selectedStatus);
-    }
+    fetchOrders();
+  }, [filter]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchOrders();
   };
-  
-  // Filter buttons
-  const FilterButton = ({ status, label }) => (
-    <TouchableOpacity
-      onPress={() => setSelectedStatus(status)}
-      className={`px-4 py-2 rounded-full mr-2 ${
-        selectedStatus === status
-          ? 'bg-primary'
-          : 'bg-gray-200'
-      }`}
-    >
-      <Text
-        className={`text-sm font-semibold ${
-          selectedStatus === status
-            ? 'text-white'
-            : 'text-gray-700'
-        }`}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
-  
-  // Render order item
-  const renderOrderItem = ({ item }) => (
-    <OrderCard order={item} />
-  );
-  
-  // Empty component
-  const renderEmpty = () => {
-    if (loading) return null;
+
+  const getOrderStats = () => ({
+    total: orders.length,
+    pending: orders.filter((o) => o.status === 'pending').length,
+    processing: orders.filter((o) => o.status === 'processing').length,
+    completed: orders.filter((o) => o.status === 'completed').length,
+  });
+
+  const stats = getOrderStats();
+
+  if (loading) {
     return (
-      <EmptyState
-        title="No Orders Found"
-        message={
-          selectedStatus === 'all'
-            ? 'No orders available in your store'
-            : `No ${selectedStatus} orders found`
-        }
-        icon="📦"
-      />
-    );
-  };
-  
-  // Footer (loading more)
-  const renderFooter = () => {
-    if (!loading || page === 1) return null;
-    return (
-      <View className="py-4">
-        <Loader size="small" text="" />
+      <View className="flex-1 bg-gray-50 justify-center items-center">
+        <ActivityIndicator size="large" color="#7c3aed" />
+        <Text className="text-gray-600 mt-4 text-base">Loading orders...</Text>
       </View>
     );
-  };
-  
-  if (loading && page === 1) {
-    return <Loader text="Loading orders..." />;
   }
-  
+
+  if (error) {
+    return (
+      <View className="flex-1 bg-gray-50">
+        <View className="bg-primary-600 pt-12 pb-6 px-4">
+          <Text className="text-3xl font-bold text-white">Orders</Text>
+        </View>
+        <View className="flex-1 justify-center items-center px-6">
+          <Text className="text-6xl mb-4">⚠️</Text>
+          <Text className="text-xl font-bold text-gray-900 mb-2 text-center">
+            Unable to Load Orders
+          </Text>
+          <Text className="text-gray-600 text-center mb-6">{error}</Text>
+          <TouchableOpacity
+            onPress={fetchOrders}
+            className="bg-primary-600 px-6 py-3 rounded-xl active:bg-primary-700"
+          >
+            <Text className="text-white font-semibold">Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Filter Bar */}
-      <View className="bg-white px-4 py-3 border-b border-gray-200">
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={[
-            { status: 'all', label: 'All' },
-            { status: ORDER_STATUSES.PENDING, label: 'Pending' },
-            { status: ORDER_STATUSES.PROCESSING, label: 'Processing' },
-            { status: ORDER_STATUSES.COMPLETED, label: 'Completed' },
-            { status: ORDER_STATUSES.CANCELLED, label: 'Cancelled' },
-          ]}
-          renderItem={({ item }) => (
-            <FilterButton status={item.status} label={item.label} />
-          )}
-          keyExtractor={(item) => item.status}
-        />
+      {/* Header */}
+      <View className="bg-primary-600 pb-6">
+        <View className="px-4 pt-12">
+          <Text className="text-3xl font-bold text-white mb-2">Orders</Text>
+          <Text className="text-primary-100 text-base">{stats.total} total orders</Text>
+        </View>
+
+        {/* Stats */}
+        <View className="flex-row px-4 mt-4 space-x-2">
+          <View className="flex-1 bg-white/20 rounded-xl p-3">
+            <Text className="text-white/80 text-xs font-medium">Pending</Text>
+            <Text className="text-white text-2xl font-bold mt-1">{stats.pending}</Text>
+          </View>
+          <View className="flex-1 bg-white/20 rounded-xl p-3">
+            <Text className="text-white/80 text-xs font-medium">Processing</Text>
+            <Text className="text-white text-2xl font-bold mt-1">{stats.processing}</Text>
+          </View>
+          <View className="flex-1 bg-white/20 rounded-xl p-3">
+            <Text className="text-white/80 text-xs font-medium">Completed</Text>
+            <Text className="text-white text-2xl font-bold mt-1">{stats.completed}</Text>
+          </View>
+        </View>
+
+        {/* Filters */}
+        <View className="flex-row px-4 mt-4 space-x-2">
+          {['all', 'pending', 'processing', 'completed'].map((status) => (
+            <TouchableOpacity
+              key={status}
+              onPress={() => setFilter(status)}
+              className={`px-4 py-2 rounded-full ${
+                filter === status ? 'bg-white' : 'bg-white/20'
+              }`}
+            >
+              <Text
+                className={`text-sm font-semibold capitalize ${
+                  filter === status ? 'text-primary-600' : 'text-white'
+                }`}
+              >
+                {status}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
-      
-      {/* Orders List */}
+
+      {/* List */}
       <FlatList
         data={orders}
-        renderItem={renderOrderItem}
         keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => <OrderCard order={item} />}
         contentContainerStyle={{ padding: 16 }}
+        showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#7c3aed']}
             tintColor="#7c3aed"
+            colors={['#7c3aed']}
           />
         }
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        ListEmptyComponent={renderEmpty}
-        ListFooterComponent={renderFooter}
+        ListEmptyComponent={
+          <View className="py-20 items-center">
+            <Text className="text-6xl mb-4">📦</Text>
+            <Text className="text-xl font-bold text-gray-900 mb-2">No Orders Found</Text>
+            <Text className="text-gray-600 text-center">
+              {filter !== 'all' ? `No ${filter} orders yet` : 'Orders will appear here'}
+            </Text>
+          </View>
+        }
       />
     </View>
   );

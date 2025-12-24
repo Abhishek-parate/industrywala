@@ -1,132 +1,162 @@
-import { View, Text, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import Constants from 'expo-constants';
-import Button from '../../components/Button';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 
 export default function SettingsScreen() {
-  const [apiInfo, setApiInfo] = useState({
-    baseUrl: '',
-    consumerKey: '',
-  });
-  
-  useEffect(() => {
-    const baseUrl = Constants.expoConfig?.extra?.WOO_BASE_URL || process.env.WOO_BASE_URL || '';
-    const key = Constants.expoConfig?.extra?.WOO_CONSUMER_KEY || process.env.WOO_CONSUMER_KEY || '';
-    
-    setApiInfo({
-      baseUrl,
-      consumerKey: key ? `${key.substring(0, 8)}...` : 'Not configured',
-    });
-  }, []);
-  
-  const openWooCommerceSettings = () => {
-    const baseUrl = apiInfo.baseUrl.replace('/wp-json/wc/v3', '');
-    Linking.openURL(`${baseUrl}/wp-admin/admin.php?page=wc-settings&tab=advanced&section=keys`);
-  };
-  
-  const SettingItem = ({ icon, title, subtitle, onPress }) => (
-    <TouchableOpacity
-      onPress={onPress}
-      className="bg-white rounded-xl p-4 mb-3 shadow-sm flex-row items-center"
-      activeOpacity={0.7}
-    >
-      <Text className="text-3xl mr-4">{icon}</Text>
-      <View className="flex-1">
-        <Text className="text-base font-semibold text-gray-800">{title}</Text>
-        {subtitle && (
-          <Text className="text-sm text-gray-500 mt-1">{subtitle}</Text>
-        )}
-      </View>
-      <Text className="text-gray-400 text-xl">›</Text>
-    </TouchableOpacity>
-  );
-  
   return (
-    <ScrollView className="flex-1 bg-gray-50 p-4">
-      {/* API Configuration */}
-      <View className="bg-white rounded-xl p-4 mb-6 shadow-sm">
-        <Text className="text-xl font-bold text-gray-800 mb-4">
-          API Configuration
-        </Text>
-        
-        <View className="mb-3">
-          <Text className="text-sm text-gray-500 mb-1">Base URL</Text>
-          <Text className="text-base text-gray-800 font-mono">
-            {apiInfo.baseUrl || 'Not configured'}
-          </Text>
-        </View>
-        
-        <View className="mb-3">
-          <Text className="text-sm text-gray-500 mb-1">Consumer Key</Text>
-          <Text className="text-base text-gray-800 font-mono">
-            {apiInfo.consumerKey}
-          </Text>
-        </View>
-        
-        <Button
-          title="Manage API Keys"
-          variant="outline"
-          size="sm"
-          onPress={openWooCommerceSettings}
-        />
+    <View className="flex-1 bg-gray-50">
+      {/* Fixed Header */}
+      <View className="bg-primary-600 pt-12  px-4">
+        <Text className="text-3xl font-bold text-white mb-2">Settings</Text>
+   
       </View>
-      
-      {/* App Information */}
-      <Text className="text-lg font-bold text-gray-800 mb-3">
-        App Information
-      </Text>
-      
-      <SettingItem
-        icon="📱"
-        title="App Version"
-        subtitle="1.0.0"
-      />
-      
-      <SettingItem
-        icon="📚"
-        title="WooCommerce API Version"
-        subtitle="v3"
-      />
-      
-      {/* Support */}
-      <Text className="text-lg font-bold text-gray-800 mb-3 mt-6">
-        Support
-      </Text>
-      
-      <SettingItem
-        icon="📖"
-        title="Documentation"
-        subtitle="View WooCommerce REST API docs"
-        onPress={() => Linking.openURL('https://woocommerce.github.io/woocommerce-rest-api-docs/')}
-      />
-      
-      <SettingItem
-        icon="🐛"
-        title="Report a Bug"
-        subtitle="Help us improve the app"
-        onPress={() => Alert.alert('Report Bug', 'Bug reporting feature coming soon')}
-      />
-      
-      {/* Danger Zone */}
-      <Text className="text-lg font-bold text-red-600 mb-3 mt-6">
-        Danger Zone
-      </Text>
-      
-      <Button
-        title="Clear Cache"
-        variant="danger"
-        onPress={() => Alert.alert('Clear Cache', 'Cache cleared successfully!')}
-      />
-      
-      {/* Footer */}
-      <View className="mt-8 mb-4">
-        <Text className="text-center text-sm text-gray-500">
-          Made with ❤️ for WooCommerce
-        </Text>
-        <Text className="text-center text-xs text-gray-400 mt-1">
-          © 2025 All rights reserved
-        </Text>
-      </View>
-    </ScrollView>
+
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="p-4">
+          {/* App Settings */}
+          <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">
+            App Settings
+          </Text>
+          <View className="bg-white rounded-2xl mb-4 border border-gray-100 overflow-hidden">
+            <TouchableOpacity 
+              className="px-5 py-4 border-b border-gray-100 flex-row items-center active:bg-gray-50"
+              onPress={() => Alert.alert('Notifications', 'Coming soon!')}
+            >
+              <View className="w-10 h-10 bg-purple-100 rounded-xl items-center justify-center mr-3">
+                <Text className="text-xl">🔔</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900 mb-0.5">
+                  Notifications
+                </Text>
+                <Text className="text-xs text-gray-500">Manage notification preferences</Text>
+              </View>
+              <Text className="text-gray-400 text-xl">›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              className="px-5 py-4 border-b border-gray-100 flex-row items-center active:bg-gray-50"
+              onPress={() => Alert.alert('Theme', 'Coming soon!')}
+            >
+              <View className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center mr-3">
+                <Text className="text-xl">🎨</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900 mb-0.5">Theme</Text>
+                <Text className="text-xs text-gray-500">Light mode</Text>
+              </View>
+              <Text className="text-gray-400 text-xl">›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              className="px-5 py-4 flex-row items-center active:bg-gray-50"
+              onPress={() => Alert.alert('Language', 'Coming soon!')}
+            >
+              <View className="w-10 h-10 bg-green-100 rounded-xl items-center justify-center mr-3">
+                <Text className="text-xl">🌐</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900 mb-0.5">Language</Text>
+                <Text className="text-xs text-gray-500">English</Text>
+              </View>
+              <Text className="text-gray-400 text-xl">›</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Account */}
+          <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1 mt-2">
+            Account
+          </Text>
+          <View className="bg-white rounded-2xl mb-4 border border-gray-100 overflow-hidden">
+            <TouchableOpacity 
+              className="px-5 py-4 border-b border-gray-100 flex-row items-center active:bg-gray-50"
+              onPress={() => Alert.alert('API Credentials', 'Configure in app.json')}
+            >
+              <View className="w-10 h-10 bg-yellow-100 rounded-xl items-center justify-center mr-3">
+                <Text className="text-xl">🔑</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900 mb-0.5">
+                  API Credentials
+                </Text>
+                <Text className="text-xs text-gray-500">Manage WooCommerce API keys</Text>
+              </View>
+              <Text className="text-gray-400 text-xl">›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              className="px-5 py-4 flex-row items-center active:bg-gray-50"
+              onPress={() => Alert.alert('Cache Cleared', 'Storage freed successfully!')}
+            >
+              <View className="w-10 h-10 bg-orange-100 rounded-xl items-center justify-center mr-3">
+                <Text className="text-xl">🗑️</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900 mb-0.5">
+                  Clear Cache
+                </Text>
+                <Text className="text-xs text-gray-500">Free up storage space</Text>
+              </View>
+              <Text className="text-gray-400 text-xl">›</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* About */}
+          <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1 mt-2">
+            About
+          </Text>
+          <View className="bg-white rounded-2xl mb-4 border border-gray-100 overflow-hidden">
+            <View className="px-5 py-4 border-b border-gray-100">
+              <Text className="text-xs text-gray-500 mb-1">App Version</Text>
+              <Text className="text-base font-semibold text-gray-900">1.0.0</Text>
+            </View>
+
+            <TouchableOpacity 
+              className="px-5 py-4 border-b border-gray-100 flex-row items-center justify-between active:bg-gray-50"
+              onPress={() => Alert.alert('Privacy Policy', 'Coming soon!')}
+            >
+              <Text className="text-base font-medium text-gray-900">Privacy Policy</Text>
+              <Text className="text-gray-400 text-xl">›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              className="px-5 py-4 flex-row items-center justify-between active:bg-gray-50"
+              onPress={() => Alert.alert('Terms', 'Coming soon!')}
+            >
+              <Text className="text-base font-medium text-gray-900">Terms of Service</Text>
+              <Text className="text-gray-400 text-xl">›</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Danger Zone */}
+          <Text className="text-xs font-bold text-red-500 uppercase tracking-wider mb-3 px-1 mt-2">
+            Danger Zone
+          </Text>
+          <View className="bg-white rounded-2xl mb-4 border-2 border-red-200 overflow-hidden">
+            <TouchableOpacity 
+              className="px-5 py-4 flex-row items-center active:bg-red-50"
+              onPress={() => 
+                Alert.alert(
+                  'Logout',
+                  'Are you sure you want to logout?',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Logout', style: 'destructive', onPress: () => {} },
+                  ]
+                )
+              }
+            >
+              <View className="w-10 h-10 bg-red-100 rounded-xl items-center justify-center mr-3">
+                <Text className="text-xl">🚪</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-red-600">Logout</Text>
+              </View>
+              <Text className="text-red-400 text-xl">›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="h-6" />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
