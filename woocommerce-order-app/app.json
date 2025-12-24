@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "WooCommerce Orders",
+    "slug": "woocommerce-order-app",
+    "version": "1.0.0",
+    "scheme": "woocommerce-orders",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7c3aed"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.woocommerceorders"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7c3aed"
+      },
+      "package": "com.yourcompany.woocommerceorders",
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "WOO_BASE_URL": "https://www.industrywala.co/wp-json/wc/v3",
+      "WOO_CONSUMER_KEY": "ck_a805e7e3e9722402cca117e6b16928f6205e2ee4",
+      "WOO_CONSUMER_SECRET": "cs_6e7869235c6747e14c6c18e53c3fc9c35f928415"
+    }
+  }
+}
